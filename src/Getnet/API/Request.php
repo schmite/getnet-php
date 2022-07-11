@@ -2,6 +2,7 @@
 namespace Getnet\API;
 
 use Exception;
+use Getnet\API\Exception\GetnetException;
 
 /**
  * Class Request
@@ -60,7 +61,7 @@ class Request {
         try {
             $response = $this->send($credentials, $url_path, self::CURL_TYPE_AUTH, $querystring);
         } catch (Exception $e) {
-            throw new Exception($e->getMessage(), 100);
+            throw new GetnetException($e->getMessage(), 100);
         }
 
         $credentials->setAuthorizationToken($response["access_token"]);
@@ -145,34 +146,46 @@ class Request {
         curl_setopt($curl, CURLOPT_ENCODING, "");
         curl_setopt_array($curl, $defaultCurlOptions);
 
+        $response = null;
+        $errorMessage = '';
+        
         try {
             $response = curl_exec($curl);
         } catch (Exception $e) {
-            print "ERROR";
+            throw new GetnetException("Request Exception, error: {$e->getMessage()}", 100);
         }
-
-        if (isset(json_decode($response)->error)) {
-            throw new Exception(json_decode($response)->error_description, 100);
+        
+        // Verify error
+        if ($response === false) {
+            $errorMessage = curl_error($curl);
         }
+        
+        $statusCode = (int) curl_getinfo($curl, CURLINFO_HTTP_CODE);
+        curl_close($curl);
 
-        if (curl_getinfo($curl, CURLINFO_HTTP_CODE) >= 400) {
-            throw new Exception($response, 100);
+
+        if ($statusCode >= 400) {
+            // TODO see what it means code 100
+            throw new GetnetException($response, 100);
         }
 
         // Status code 204 don't have content. That means $response will be always false
         // Provides a custom content for $response to avoid error in the next if logic
-        if (curl_getinfo($curl, CURLINFO_HTTP_CODE) == 204) {
-            curl_close($curl);
+        if ($statusCode === 204) {
             return ['status_code' => 204];
         }
 
-        if (! $response) {
-            print "ERROR";
-            EXIT();
+        if (!$response) {
+            throw new GetnetException("Empty response, curl_error: $errorMessage", $statusCode);
         }
-        curl_close($curl);
+        
+        $responseDecode = json_decode($response, true);
 
-        return json_decode($response, true);
+        if (is_array($responseDecode) && isset($responseDecode['error'])) {
+            throw new GetnetException($responseDecode['error_description'], 100);
+        }
+
+        return $responseDecode;
     }
 
     /**
