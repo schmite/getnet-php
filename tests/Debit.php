@@ -91,50 +91,35 @@ $transaction->shipping()
 //Adiciona o dispositivo
 $transaction->device("device_id")->setIpAddress("127.0.0.1");
 
-$response = $getnet->authorize($transaction);
-print_r($response->getStatus()."\n");
-
-##### EMULA O REDIRECIONAMENTO E POST LADO CLIENTE -  $response->getRedirectUrl()
-
-//URL QUE A GETNET IRÁ RETORNAR com o parametro payer_authentication_response
-$URL_NOTIFY = "http://localhost/url-notify";
-
-// EMULA POST
-$curl = curl_init();
-curl_setopt_array($curl, array(
-    CURLOPT_URL            => $response->getRedirectUrl(),
-    CURLOPT_RETURNTRANSFER => true,
-    CURLOPT_ENCODING       => "",
-    CURLOPT_MAXREDIRS      => 10,
-    CURLOPT_TIMEOUT        => 30,
-    CURLOPT_HTTP_VERSION   => CURL_HTTP_VERSION_1_1,
-    CURLOPT_CUSTOMREQUEST  => "POST",
-    CURLOPT_POSTFIELDS     => "MD=".$response->getIssuerPaymentId()."&PaReq=".$response->getPayerAuthenticationRequest()."&TermUrl=".urlencode($URL_NOTIFY),
-    CURLOPT_HTTPHEADER     => array(
-        "Cache-Control: no-cache",
-        "Content-Type: application/x-www-form-urlencoded"
-    ),
-));
-$response_curl = curl_exec($curl);
-curl_close($curl);
-$word = explode("VALUE=", $response_curl);
-$payer_authentication_response = trim(str_replace(' escapeXml="false"/>', "", strip_tags($word[1])));
-?>
-<form action="<?php echo $response->getRedirectUrl();?>" method="post" target="_blank">
-    <input type="hidden" name="MD"  value="<?php echo $response->getIssuerPaymentId();?>" />
-    <input type="hidden" name="PaReq"  value="<?php echo $response->getPayerAuthenticationRequest();?>" />
-    <input type="hidden" name="TermUrl"  value="<?php echo $URL_NOTIFY;?>" />
+if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+    $response = $getnet->authorize($transaction);
+    print_r($response->getStatus()."\n");
     
-    <input type="submit" value="Authentication Card" />
-</form>
+    ##### EMULA O REDIRECIONAMENTO E POST LADO CLIENTE -  $response->getRedirectUrl()
+    
+    // Pega a url atual como retorno
+    $URL_NOTIFY = $_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER["SERVER_NAME"] . $_SERVER["REQUEST_URI"] . "?payment_id={$response->getPaymentId()}";
+    ?>
+    <form action="<?php echo $response->getRedirectUrl();?>" method="post" target="_blank">
+        <input type="hidden" name="MD"  value="<?php echo $response->getIssuerPaymentId();?>" />
+        <input type="hidden" name="PaReq"  value="<?php echo $response->getPayerAuthenticationRequest();?>" />
+        <input type="hidden" name="TermUrl"  value="<?php echo $URL_NOTIFY;?>" />
+        
+        <input type="submit" value="Authentication Card" />
+    </form>
 
 <?php
-//CONFIRMAR O PAGAMENTO COM payer_authentication_response recibo na URL de Noficação
-$response = $getnet->authorizeConfirmDebit($response->getPaymentId(), $payer_authentication_response);
-print_r($response->getStatus()."\n");
+// https://developers.getnet.com.br/simulator demora um pouco para processar e retornar o POST
+} else if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $payment_id = $_GET['payment_id'];
+    $paRes = $_POST['PaRes'];
 
-
-### CANCELA PAGAMENTO (CANCEL)
-$cancel = $getnet->authorizeCancel($response->getPaymentId(), $response->getAmount());
-
-print_r($cancel->getStatus()."\n");
+    //CONFIRMAR O PAGAMENTO COM payer_authentication_response recibo na URL de Noficação
+    $response = $getnet->authorizeConfirmDebit($payment_id, $paRes);
+    print_r($response->getStatus()."\n");
+    
+    ### CANCELA PAGAMENTO (CANCEL)
+    $cancel = $getnet->cancelTransaction($payment_id, $response->getAmount(), uniqid());
+    
+    print_r($cancel->getStatus()."\n");
+}
