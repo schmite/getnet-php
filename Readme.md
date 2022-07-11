@@ -147,6 +147,27 @@ $cancel = $getnet->authorizeCancel("[PAYMENT_ID]", [AMOUNT]);
 $cancel->getStatus();
 ```
 
+#### PAGAMENTO VIA PIX
+```php
+// Autenticação da API
+$getnet = new Getnet($client_id, $client_secret, $environment);
+// Atenção Obrigatório adicionar seller_id no header do PIX
+$getnet->setSellerId($seller_id);
+
+// Cria a transação
+$transaction = new PixTransaction(75.50);
+$transaction->setCurrency("BRL");
+$transaction->setOrderId('DEV-1608748980');
+$transaction->setCustomerId('12345');
+
+// Cria a transação e retorna dados do QR Code
+// Pagamento é confirmado via notificações https://developers.getnet.com.br/api#tag/Notificacoes-1.0
+// O QR Code PIX tem um limite de expiração, que é de 3 minutos, após esse período deve ser gerado um novo QR Code e o anterior deve ser desconsiderado.
+$response = $getnet->pix($transaction);
+print $response->getQrCode();
+
+```
+
 #### CARTÃO DE DÉBITO
 ```php
 // Autenticação da API

@@ -333,8 +333,7 @@ class Transaction implements \JsonSerializable
 
     /**
      *
-     * @param
-     *            $our_number
+     * @param string|int $our_number
      * @return Boleto
      */
     public function boleto($our_number)

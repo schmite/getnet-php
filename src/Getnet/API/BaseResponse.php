@@ -56,12 +56,14 @@ class BaseResponse implements \JsonSerializable
      */
     public function mapperJson($json)
     {
-        array_walk_recursive($json, function ($value, $key) {
+        if (is_array($json)) {
+            array_walk_recursive($json, function ($value, $key) {
 
-            if (property_exists($this, $key)) {
-                $this->$key = $value;
-            }
-        });
+                if (property_exists($this, $key)) {
+                    $this->$key = $value;
+                }
+            });
+        }
 
         $this->setResponseJSON($json);
 
