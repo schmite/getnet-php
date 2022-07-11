@@ -18,6 +18,8 @@ class Getnet {
 
     private $keySession;
     
+    private $debug = false;
+    
 
     /**
      * 
@@ -118,6 +120,22 @@ class Getnet {
      */
     public function setKeySession($keySession) {
         $this->keySession = (string)$keySession;
+    }
+    
+    /**
+     * @return bool|null
+     */
+    public function getDebug() {
+        return $this->debug;
+    }
+    
+    /**
+     * @param bool|null $debug
+     */
+    public function setDebug($debug = false) {
+        $this->debug = $debug;
+        
+        return $this;
     }
 
     /**
