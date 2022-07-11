@@ -6,8 +6,10 @@ namespace Getnet\API;
  *
  * @package Getnet\API
  */
-class Boleto implements \JsonSerializable {
-    
+class Boleto implements \JsonSerializable
+{
+    use TraitEntity;
+
     const PROVIDER_SANTANDER = "santander";
 
     private $our_number;
@@ -21,24 +23,23 @@ class Boleto implements \JsonSerializable {
     private $provider;
 
     /**
-     * Boleto constructor.
      *
-     * @param
-     *            $our_number
+     * @param string|null $our_number
+     *
      */
-    public function __construct($our_number = null) {
-        $this->our_number = $our_number;
-    }
-
-    public function jsonSerialize() {
-        return get_object_vars($this);
+    public function __construct($our_number = null)
+    {
+        if ($our_number) {
+            $this->our_number = $our_number;
+        }
     }
 
     /**
      *
      * @return mixed
      */
-    public function getOurNumber() {
+    public function getOurNumber()
+    {
         return $this->our_number;
     }
 
@@ -47,8 +48,9 @@ class Boleto implements \JsonSerializable {
      * @param mixed $our_number
      * @return Boleto
      */
-    public function setOurNumber($our_number) {
-        $this->our_number = (string)$our_number;
+    public function setOurNumber($our_number)
+    {
+        $this->our_number = (string) $our_number;
 
         return $this;
     }
@@ -57,7 +59,8 @@ class Boleto implements \JsonSerializable {
      *
      * @return mixed
      */
-    public function getDocumentNumber() {
+    public function getDocumentNumber()
+    {
         return $this->document_number;
     }
 
@@ -66,8 +69,9 @@ class Boleto implements \JsonSerializable {
      * @param mixed $document_number
      * @return Boleto
      */
-    public function setDocumentNumber($document_number) {
-        $this->document_number = (string)$document_number;
+    public function setDocumentNumber($document_number)
+    {
+        $this->document_number = (string) $document_number;
 
         return $this;
     }
@@ -76,7 +80,8 @@ class Boleto implements \JsonSerializable {
      *
      * @return mixed
      */
-    public function getExpirationDate() {
+    public function getExpirationDate()
+    {
         return $this->expiration_date;
     }
 
@@ -85,8 +90,9 @@ class Boleto implements \JsonSerializable {
      * @param mixed $expiration_date
      * @return Boleto
      */
-    public function setExpirationDate($expiration_date) {
-        $this->expiration_date = (string)$expiration_date;
+    public function setExpirationDate($expiration_date)
+    {
+        $this->expiration_date = (string) $expiration_date;
 
         return $this;
     }
@@ -95,7 +101,8 @@ class Boleto implements \JsonSerializable {
      *
      * @return mixed
      */
-    public function getInstructions() {
+    public function getInstructions()
+    {
         return $this->instructions;
     }
 
@@ -104,8 +111,9 @@ class Boleto implements \JsonSerializable {
      * @param mixed $instructions
      * @return Boleto
      */
-    public function setInstructions($instructions) {
-        $this->instructions = (string)$instructions;
+    public function setInstructions($instructions)
+    {
+        $this->instructions = (string) $instructions;
 
         return $this;
     }
@@ -114,7 +122,8 @@ class Boleto implements \JsonSerializable {
      *
      * @return mixed
      */
-    public function getProvider() {
+    public function getProvider()
+    {
         return $this->provider;
     }
 
@@ -123,10 +132,10 @@ class Boleto implements \JsonSerializable {
      * @param mixed $provider
      * @return Boleto
      */
-    public function setProvider($provider) {
-        $this->provider = (string)$provider;
+    public function setProvider($provider)
+    {
+        $this->provider = (string) $provider;
 
         return $this;
     }
-    
 }
