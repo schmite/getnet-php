@@ -8,4 +8,4 @@ composer.lock
 /.idea
 /tests/tmp
 /tests/.phpunit.result.cache
-tests/env.test.php
+config/env.test.php
