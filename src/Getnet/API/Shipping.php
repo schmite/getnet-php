@@ -133,7 +133,7 @@ class Shipping implements \JsonSerializable
 
     /**
      *
-     * @param mixed $address
+     * @param Address $address
      */
     public function setAddress(Address $address)
     {

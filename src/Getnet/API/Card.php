@@ -35,7 +35,7 @@ class Card implements \JsonSerializable
     /**
      * Card constructor.
      *
-     * @param Token $card
+     * @param Token $token
      */
     public function __construct(Token $token)
     {
@@ -133,7 +133,7 @@ class Card implements \JsonSerializable
 
     /**
      *
-     * @param mixed $number_token
+     * @param mixed $token
      */
     public function setNumberToken($token)
     {

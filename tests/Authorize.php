@@ -103,5 +103,5 @@ print_r($response->getStatus()."\n");
 
 ### CANCELA PAGAMENTO (CANCEL)
 $capture = $getnet->authorizeCancel($response->getPaymentId(), $response->getAmount());
-print_r($capture, $capture->getStatus()."\n");
+print_r($capture->getStatus()."\n");
 

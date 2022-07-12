@@ -95,7 +95,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $response = $getnet->authorize($transaction);
     print_r($response->getStatus()."\n");
     
-    ##### EMULA O REDIRECIONAMENTO E POST LADO CLIENTE -  $response->getRedirectUrl()
+    if (!($response instanceof \Getnet\API\AuthorizeResponse)) {
+        return;
+    }
     
     // Pega a url atual como retorno
     $URL_NOTIFY = $_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER["SERVER_NAME"] . $_SERVER["REQUEST_URI"] . "?payment_id={$response->getPaymentId()}";

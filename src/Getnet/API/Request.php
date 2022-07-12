@@ -110,7 +110,7 @@ class Request
      * @param Getnet $credentials
      * @param mixed $url_path
      * @param mixed $method
-     * @param mixed $json
+     * @param mixed $jsonBody
      * @throws Exception
      * @return mixed
      * @throws \Exception

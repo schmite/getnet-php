@@ -201,11 +201,10 @@ class Credit implements \JsonSerializable
 
     /**
      *
-     * @param
-     *            $token
+     * @param Token $token
      * @return Card
      */
-    public function card($token)
+    public function card(Token $token)
     {
         $card = new Card($token);
 

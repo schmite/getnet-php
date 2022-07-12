@@ -44,10 +44,6 @@ class BoletoRespose extends BaseResponse
         return $this;
     }
 
-    /**
-     *
-     * @param mixed $base_url
-     */
     public function generateLinks()
     {
         if ($this->getPaymentId()) {

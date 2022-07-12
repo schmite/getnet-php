@@ -27,8 +27,6 @@ class Token
         $this->setCardNumber($card_number);
         $this->setCustomerId($customer_id);
         $this->setNumberToken($credencial);
-
-        return $this;
     }
 
     /**

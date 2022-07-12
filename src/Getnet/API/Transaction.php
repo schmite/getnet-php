@@ -106,11 +106,10 @@ class Transaction implements \JsonSerializable
 
     /**
      *
-     * @param
-     *            $order_id
+     * @param string|null $order_id
      * @return Order
      */
-    public function order($order_id)
+    public function order($order_id = null)
     {
         $order = new Order($order_id);
         $this->setOrder($order);
@@ -280,7 +279,7 @@ class Transaction implements \JsonSerializable
 
     /**
      *
-     * @return Credit
+     * @return Credit|null
      */
     public function getCredit()
     {
@@ -313,7 +312,7 @@ class Transaction implements \JsonSerializable
 
     /**
      *
-     * @return Credit
+     * @return Credit|null
      */
     public function getDebit()
     {
@@ -346,7 +345,7 @@ class Transaction implements \JsonSerializable
 
     /**
      *
-     * @return Boleto
+     * @return Boleto|null
      */
     public function getBoleto()
     {

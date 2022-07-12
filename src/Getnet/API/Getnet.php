@@ -30,7 +30,7 @@ class Getnet
      *
      * @param string $client_id
      * @param string $client_secret
-     * @param Environment|null $env
+     * @param Environment|null $environment
      * @return Getnet
      */
     public function __construct($client_id, $client_secret, Environment $environment = null, $keySession = null)
@@ -46,12 +46,12 @@ class Getnet
 
         $request = new Request($this);
 
-        return $request->auth($this);
+        $request->auth($this);
     }
 
     /**
      *
-     * @return \Getnet\API\Request
+     * @return string
      */
     public function getClientId()
     {
@@ -60,7 +60,7 @@ class Getnet
 
     /**
      *
-     * @param \Getnet\API\Request $client_id
+     * @param string $client_id
      */
     public function setClientId($client_id)
     {
@@ -112,7 +112,7 @@ class Getnet
 
     /**
      *
-     * @param string $environment
+     * @param Environment $environment
      */
     public function setEnvironment(Environment $environment)
     {
