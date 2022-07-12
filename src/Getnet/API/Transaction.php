@@ -332,10 +332,10 @@ class Transaction implements \JsonSerializable
 
     /**
      *
-     * @param string|int $our_number
+     * @param string|null $our_number
      * @return Boleto
      */
-    public function boleto($our_number)
+    public function boleto($our_number = null)
     {
         $boleto = new Boleto($our_number);
         $this->boleto = $boleto;
