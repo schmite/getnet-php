@@ -6,7 +6,7 @@ trait TraitEntity
 
     /**
      *
-     * @return array
+     * @return mixed
      */
     public function jsonSerialize()
     {

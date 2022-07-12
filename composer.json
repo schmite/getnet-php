@@ -25,9 +25,10 @@
     },
     "scripts":{
         "phpstan":"phpstan analyse -c phpstan.neon",
+        "phpunit":"phpunit --configuration phpunit.xml --testdox",
         "test":[
             "@phpstan",
-            "phpunit --configuration phpunit.xml --testdox"
+            "@phpunit"
         ],
         "test:unit":"phpunit --configuration phpunit.xml --testdox --exclude e2e",
         "test:e2e":"phpunit --configuration phpunit.xml --testdox --group e2e",
