@@ -49,7 +49,7 @@ class BaseResponse implements \JsonSerializable
     }
 
     /**
-     *
+     * TODO refactor and mapper individual and remove public props
      * @param array $json
      *
      * @return $this
@@ -275,6 +275,7 @@ class BaseResponse implements \JsonSerializable
         } elseif (isset($this->redirect_url)) {
             $this->status = Transaction::STATUS_PENDING;
         } elseif (isset($this->status_label)) {
+            // TODO check why return EM ABERTO in boleto 
             $this->status = $this->status_label;
         }
 
