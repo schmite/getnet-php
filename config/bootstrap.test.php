@@ -2,11 +2,12 @@
 use Getnet\API\Getnet;
 use Getnet\API\Environment;
 
-require_once '../vendor/autoload.php';
+$ROOTDIR = dirname(__DIR__);
 
-// Include if exists
+require_once $ROOTDIR . '/vendor/autoload.php';
+
 // for local development copy config/env.test.php.txt to config/env.test.php and add your credentials
-require_once 'env.test.php';
+require_once $ROOTDIR . '/config/env.test.php';
 
 /**
  *
