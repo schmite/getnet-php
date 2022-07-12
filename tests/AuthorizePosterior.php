@@ -51,7 +51,7 @@ $transaction->credit()
             ->card($tokenCard)
                 ->setBrand(Card::BRAND_MASTERCARD)
                 ->setExpirationMonth("12")
-                ->setExpirationYear("20")
+                ->setExpirationYear(date('y')+1)
                 ->setCardholderName("Jax Teller")
                 ->setSecurityCode("123");
 
@@ -98,10 +98,10 @@ $transaction->shipping()
 $transaction->device("device_id")->setIpAddress("127.0.0.1");
 
 $response = $getnet->authorize($transaction);
-print_r($response,$response->getStatus()."\n");
+print_r($response->getStatus()."\n");
 
 ### CONFIRMA PAGAMENTO (CAPTURA)
-$capture = $getnet->authorizeConfirm($response->getPaymentId());
+$capture = $getnet->authorizeConfirm($response->getPaymentId(), $response->getAmount());
 print_r($capture->getStatus()."\n");
 
 ### CANCELA PAGAMENTO (CANCEL)

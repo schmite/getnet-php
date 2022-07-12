@@ -61,5 +61,8 @@ $transaction->customer("customer_210818263")
 $response = $getnet->boleto($transaction);
 
 print_r($response->getStatus()."\n");
-print_r($response->getBoletoHtml()."\n");
+
+if ($response instanceof \Getnet\API\BoletoRespose) {
+    print_r($response->getBoletoHtml()."\n");
+}
 

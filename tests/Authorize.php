@@ -51,7 +51,7 @@ $transaction->credit()
             ->card($tokenCard)
                 ->setBrand(Card::BRAND_MASTERCARD)
                 ->setExpirationMonth("12")
-                ->setExpirationYear("20")
+                ->setExpirationYear(date('y')+1)
                 ->setCardholderName("Jax Teller")
                 ->setSecurityCode("123");
 
@@ -103,5 +103,5 @@ print_r($response->getStatus()."\n");
 
 ### CANCELA PAGAMENTO (CANCEL)
 $capture = $getnet->authorizeCancel($response->getPaymentId(), $response->getAmount());
-print_r($capture, $capture->getStatus()."\n");
+print_r($capture->getStatus()."\n");
 

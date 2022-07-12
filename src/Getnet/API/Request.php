@@ -2,13 +2,15 @@
 namespace Getnet\API;
 
 use Exception;
+use Getnet\API\Exception\GetnetException;
 
 /**
  * Class Request
  *
  * @package Getnet\API
  */
-class Request {
+class Request
+{
 
     /**
      * Base url from api
@@ -17,10 +19,14 @@ class Request {
      */
     private $baseUrl = '';
 
-    const CURL_TYPE_AUTH   = "AUTH";
-    const CURL_TYPE_POST   = "POST";
-    const CURL_TYPE_PUT    = "PUT";
-    const CURL_TYPE_GET    = "GET";
+    const CURL_TYPE_AUTH = "AUTH";
+
+    const CURL_TYPE_POST = "POST";
+
+    const CURL_TYPE_PUT = "PUT";
+
+    const CURL_TYPE_GET = "GET";
+
     const CURL_TYPE_DELETE = "DELETE";
 
     /**
@@ -28,10 +34,11 @@ class Request {
      *
      * @param Getnet $credentials
      */
-    public function __construct(Getnet $credentials) {
+    public function __construct(Getnet $credentials)
+    {
         $this->baseUrl = $credentials->getEnvironment()->getApiUrl();
 
-        if (!$credentials->getAuthorizationToken()) {
+        if (! $credentials->getAuthorizationToken()) {
             $this->auth($credentials);
         }
     }
@@ -42,8 +49,8 @@ class Request {
      * @return Getnet
      * @throws Exception
      */
-    public function auth(Getnet $credentials) {
-
+    public function auth(Getnet $credentials)
+    {
         if ($this->verifyAuthSession($credentials)) {
             return $credentials;
         }
@@ -60,12 +67,12 @@ class Request {
         try {
             $response = $this->send($credentials, $url_path, self::CURL_TYPE_AUTH, $querystring);
         } catch (Exception $e) {
-            throw new Exception($e->getMessage(), 100);
+            throw new GetnetException($e->getMessage(), 100);
         }
 
         $credentials->setAuthorizationToken($response["access_token"]);
 
-        //Save auth session
+        // Save auth session
         if ($credentials->getKeySession()) {
             $response['generated'] = microtime(true);
             $_SESSION[$credentials->getKeySession()] = $response;
@@ -80,12 +87,12 @@ class Request {
      * @param Getnet $credentials
      * @return boolean
      */
-    private function verifyAuthSession(Getnet $credentials){
-
+    private function verifyAuthSession(Getnet $credentials)
+    {
         if ($credentials->getKeySession() && isset($_SESSION[$credentials->getKeySession()]) && $_SESSION[$credentials->getKeySession()]["access_token"]) {
 
             $auth = $_SESSION[$credentials->getKeySession()];
-            $now  = microtime(true);
+            $now = microtime(true);
             $init = $auth["generated"];
 
             if (($now - $init) < $auth["expires_in"]) {
@@ -103,12 +110,13 @@ class Request {
      * @param Getnet $credentials
      * @param mixed $url_path
      * @param mixed $method
-     * @param mixed $json
+     * @param mixed $jsonBody
      * @throws Exception
      * @return mixed
      * @throws \Exception
      */
-    private function send(Getnet $credentials, $url_path, $method, $json = NULL) {
+    private function send(Getnet $credentials, $url_path, $method, $jsonBody = null)
+    {
         $curl = curl_init($this->getFullUrl($url_path));
 
         $defaultCurlOptions = array(
@@ -122,57 +130,77 @@ class Request {
             CURLOPT_SSL_VERIFYPEER => 0
         );
 
-        if ($method == self::CURL_TYPE_POST) {
-            $defaultCurlOptions[CURLOPT_HTTPHEADER][] = 'Authorization: Bearer ' . $credentials->getAuthorizationToken();
-            curl_setopt($curl, CURLOPT_POST, 1);
-            curl_setopt($curl, CURLOPT_POSTFIELDS, $json);
-        } elseif ($method == self::CURL_TYPE_GET) {
-            $defaultCurlOptions[CURLOPT_HTTPHEADER][] = 'Authorization: Bearer ' . $credentials->getAuthorizationToken();
-        } elseif ($method == self::CURL_TYPE_DELETE) {
-            $defaultCurlOptions[CURLOPT_HTTPHEADER][] = 'Authorization: Bearer ' . $credentials->getAuthorizationToken();
-            curl_setopt($curl, CURLOPT_CUSTOMREQUEST, self::CURL_TYPE_DELETE);
-        } elseif ($method == self::CURL_TYPE_PUT) {
-            $defaultCurlOptions[CURLOPT_HTTPHEADER][] = 'Authorization: Bearer ' . $credentials->getAuthorizationToken();
-            curl_setopt($curl, CURLOPT_CUSTOMREQUEST, self::CURL_TYPE_PUT);
-            curl_setopt($curl, CURLOPT_POSTFIELDS, $json);
+        // Use in PIX
+        if (! empty($credentials->getSellerId())) {
+            $defaultCurlOptions[CURLOPT_HTTPHEADER][] = 'seller_id: ' . $credentials->getSellerId();
+        }
 
-        } elseif ($method == self::CURL_TYPE_AUTH) {
+        // Auth
+        if ($method === self::CURL_TYPE_AUTH) {
             $defaultCurlOptions[CURLOPT_HTTPHEADER][0] = 'application/x-www-form-urlencoded';
             curl_setopt($curl, CURLOPT_USERPWD, $credentials->getClientId() . ":" . $credentials->getClientSecret());
-            curl_setopt($curl, CURLOPT_POST, 1);
-            curl_setopt($curl, CURLOPT_POSTFIELDS, $json);
+        } else {
+            $defaultCurlOptions[CURLOPT_HTTPHEADER][] = 'Authorization: Bearer ' . $credentials->getAuthorizationToken();
         }
+
+        // Add custom method
+        if (in_array($method, [
+            self::CURL_TYPE_DELETE,
+            self::CURL_TYPE_PUT
+        ])) {
+            curl_setopt($curl, CURLOPT_CUSTOMREQUEST, $method);
+        }
+
+        // Add body params
+        if (! empty($jsonBody)) {
+            curl_setopt($curl, CURLOPT_POST, 1);
+            curl_setopt($curl, CURLOPT_POSTFIELDS, is_string($jsonBody) ? $jsonBody : json_encode($jsonBody));
+        }
+
         curl_setopt($curl, CURLOPT_ENCODING, "");
         curl_setopt_array($curl, $defaultCurlOptions);
+
+        $response = null;
+        $errorMessage = '';
 
         try {
             $response = curl_exec($curl);
         } catch (Exception $e) {
-            print "ERROR";
+            throw new GetnetException("Request Exception, error: {$e->getMessage()}", 100);
         }
 
-        if (isset(json_decode($response)->error)) {
-            throw new Exception(json_decode($response)->error_description, 100);
+        // Verify error
+        if ($response === false) {
+            $errorMessage = curl_error($curl);
         }
 
-        if (curl_getinfo($curl, CURLINFO_HTTP_CODE) >= 400) {
-            throw new Exception($response, 100);
+        $statusCode = (int) curl_getinfo($curl, CURLINFO_HTTP_CODE);
+        curl_close($curl);
+
+        if ($statusCode >= 400) {
+            // TODO see what it means code 100
+            throw new GetnetException($response, 100);
         }
 
         // Status code 204 don't have content. That means $response will be always false
         // Provides a custom content for $response to avoid error in the next if logic
-        if (curl_getinfo($curl, CURLINFO_HTTP_CODE) == 204) {
-            curl_close($curl);
-            return ['status_code' => 204];
+        if ($statusCode === 204) {
+            return [
+                'status_code' => 204
+            ];
         }
 
         if (! $response) {
-            print "ERROR";
-            EXIT();
+            throw new GetnetException("Empty response, curl_error: $errorMessage", $statusCode);
         }
-        curl_close($curl);
 
-        return json_decode($response, true);
+        $responseDecode = json_decode($response, true);
+
+        if (is_array($responseDecode) && isset($responseDecode['error'])) {
+            throw new GetnetException($responseDecode['error_description'], 100);
+        }
+
+        return $responseDecode;
     }
 
     /**
@@ -181,7 +209,8 @@ class Request {
      * @param string $url_path
      * @return string $url(config) + $url_path
      */
-    private function getFullUrl($url_path) {
+    private function getFullUrl($url_path)
+    {
         if (stripos($url_path, $this->baseUrl, 0) === 0) {
             return $url_path;
         }
@@ -193,7 +222,8 @@ class Request {
      *
      * @return string
      */
-    public function getBaseUrl() {
+    public function getBaseUrl()
+    {
         return $this->baseUrl;
     }
 
@@ -201,10 +231,10 @@ class Request {
      *
      * @param Getnet $credentials
      * @param mixed $url_path
-     * @return mixed
-     * * @throws Exception
+     * @return mixed * @throws Exception
      */
-    public function get(Getnet $credentials, $url_path) {
+    public function get(Getnet $credentials, $url_path)
+    {
         return $this->send($credentials, $url_path, self::CURL_TYPE_GET);
     }
 
@@ -213,10 +243,10 @@ class Request {
      * @param Getnet $credentials
      * @param mixed $url_path
      * @param mixed $params
-     * @return mixed
-     * * @throws Exception
+     * @return mixed * @throws Exception
      */
-    public function post(Getnet $credentials, $url_path, $params) {
+    public function post(Getnet $credentials, $url_path, $params)
+    {
         return $this->send($credentials, $url_path, self::CURL_TYPE_POST, $params);
     }
 
@@ -225,10 +255,10 @@ class Request {
      * @param Getnet $credentials
      * @param mixed $url_path
      * @param mixed $params
-     * @return mixed
-     * * @throws Exception
+     * @return mixed * @throws Exception
      */
-    public function put(Getnet $credentials, $url_path, $params) {
+    public function put(Getnet $credentials, $url_path, $params)
+    {
         return $this->send($credentials, $url_path, self::CURL_TYPE_PUT, $params);
     }
 
@@ -236,11 +266,10 @@ class Request {
      *
      * @param Getnet $credentials
      * @param mixed $url_path
-     * @return mixed
-     * * @throws Exception
+     * @return mixed * @throws Exception
      */
-    public function delete(Getnet $credentials, $url_path) {
+    public function delete(Getnet $credentials, $url_path)
+    {
         return $this->send($credentials, $url_path, self::CURL_TYPE_DELETE);
     }
-
 }
