@@ -3,3 +3,9 @@
 /.project
 .buildpath
 composer.lock
+/build
+/vendor
+/.idea
+/tests/tmp
+/tests/.phpunit.result.cache
+tests/env.test.php
