@@ -35,9 +35,9 @@ use Getnet\API\Boleto;
 
 include 'vendor/autoload.php';
 
-$client_id      = "3a666a8c-6d97-4eb0-a62c-77e3758c3425";
-$client_secret  = "f52a2358-70e6-4baa-b77f-9f0eeb7c8706";
-$seller_id      = "c695b415-6f2e-4475-a221-3c005258a450";
+$client_id      = "xxxxxxxx-xxxx-xxxx-xxxxxxxxxxxxxxxxx";
+$client_secret  = "xxxxxxxx-xxxx-xxxx-xxxxxxxxxxxxxxxxx";
+$seller_id      = "xxxxxxxx-xxxx-xxxx-xxxxxxxxxxxxxxxxx";
 $environment    = Environment::sandbox();
 
 //Opicional, passar chave se você quiser guardar o token do auth na sessão para não precisar buscar a cada trasação, só quando expira
