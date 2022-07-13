@@ -1,32 +1,19 @@
 <?php
-use Getnet\API\Getnet;
 use Getnet\API\Transaction;
-use Getnet\API\Environment;
 use Getnet\API\Token;
 use Getnet\API\Credit;
 use Getnet\API\Customer;
 use Getnet\API\Card;
 use Getnet\API\Order;
 
-
-session_start();
-include "../vendor/autoload.php";
-
-
-$client_id      = "3a666a8c-6d97-4eb0-a62c-77e3758c3425";
-$client_secret  = "f52a2358-70e6-4baa-b77f-9f0eeb7c8706";
-$seller_id      = "c695b415-6f2e-4475-a221-3c005258a450";
-$environment    = Environment::sandbox();
-
-//Opicional, passar chave se você quiser guardar o token do auth na sessão para não precisar buscar a cada trasação, só quando expira
-$keySession = null;
+require_once '../config/bootstrap.test.php';
 
 //Autenticação da API
-$getnet = new Getnet($client_id, $client_secret, $environment, $keySession);
+$getnet = getnetServiceTest();
 
 //Cria a transação
 $transaction = new Transaction();
-$transaction->setSellerId($seller_id);
+$transaction->setSellerId($getnet->getSellerId());
 $transaction->setCurrency("BRL");
 $transaction->setAmount(45.90);
 

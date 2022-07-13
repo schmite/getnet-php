@@ -6,11 +6,15 @@ Todos os passos e processos referentes à integração com o sistema de captura 
  Documentação oficial
 * https://developers.getnet.com.br/api
 
+#### Pré-requisitos
+
+- PHP `>=7.4`
+
 #### Composer
 
 add composer.json
 ```
-"edson-nascimento/getnet-php": "^1.0"
+"edson-nascimento/getnet-php": "^2.0"
 ```
 ou execute
 ```
@@ -270,6 +274,7 @@ $response->getStatus();
 |DENIED|Negada|
 |AUTHORIZED|Autorizada pelo emissor|
 |CONFIRMED|Confirmada ou Capturada|
+|WAITING|Aguardando pagamento pix|
 
 ### Cartões para testes
 
@@ -305,5 +310,19 @@ $response->getStatus();
 |authorizeConfirmDebit|Confirma uma autorização de débito|
 |authorizeCancel|Cancela a transação|
 |boleto|Gera boleto|
+
+###  Instalar e configurar ambiente para desenvolvimento/alterações
+
+- Clone o repositório
+- Instale as dependências rodando `composer install` na raiz do projeto
+- Na pasta `config` crie um arquivo `config/env.test.php` baseado no `config/env.test.php.txt`
+- Adicione suas credenciais do sandbox da getnet no `config/env.test.php`
+-  **Rodar testes**
+    - `composer test`
+    - `composer test:unit`
+    - `composer test:e2e`
+    - `composer phpstan`
+
+
 
 

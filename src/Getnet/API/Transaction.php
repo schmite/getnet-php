@@ -15,6 +15,8 @@ class Transaction implements \JsonSerializable
     const STATUS_CONFIRMED = "CONFIRMED";
 
     const STATUS_PENDING = "PENDING";
+    
+    const STATUS_WAITING = "WAITING";
 
     const STATUS_APPROVED = "APPROVED";
 
