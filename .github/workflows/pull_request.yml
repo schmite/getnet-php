@@ -1,33 +1,49 @@
 name: Run tests
 on:
-  push:
-    branches:
-      - feature/drop-support-php56
   pull_request:
     types:
       - opened
       - reopened
       - ready_for_review
-  workflow_dispatch:
+
+env:
+  PHP_EXTENSIONS: mbstring
+  PHP_TOOLS: composer:v2, phpunit:9.5
+
 jobs:
   run-tests:
     if: ${{ !github.event.pull_request.draft }}
     runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        php-version:
+          - 7.4
+
     steps:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Add HTTP basic auth credentials
-        run: echo '${{ secrets.COMPOSER_AUTH_JSON }}' > $GITHUB_WORKSPACE/auth.json
-
       - name: Install PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: "7.4"
-          extensions: mbstring
-          tools: composer:v2, phpunit:9.5
+          coverage: none
+          php-version: ${{ matrix.php-version }}
+          extensions: ${{ env.PHP_EXTENSIONS }}
+          tools: ${{ env.PHP_TOOLS }}
       
-      #TODO test with env github actios
+      - name: Determine composer cache directory
+        id: determine-composer-cache-directory
+        run: echo "::set-output name=directory::$(composer config cache-dir)"
+
+      - name: Cache dependencies installed with composer
+        uses: actions/cache@v2
+        with:
+          path: ${{ steps.determine-composer-cache-directory.outputs.directory }}
+          key: php-${{ matrix.php-version }}-composer-${{ hashFiles('composer.json') }}
+          restore-keys: php-${{ matrix.php-version }}-composer-
+      
+      # TODO test direct env php with github actios
       - name: Add config/env.test.php
         run: echo '${{ secrets.ENV_PHP }}' > $GITHUB_WORKSPACE/config/env.test.php
 
